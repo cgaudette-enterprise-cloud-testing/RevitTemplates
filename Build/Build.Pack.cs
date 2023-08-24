@@ -1,20 +1,17 @@
 ﻿using Nuke.Common.Tools.DotNet;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
-partial class Build
+sealed partial class Build
 {
     Target Pack => _ => _
         .TriggeredBy(Compile)
         .Executes(() =>
         {
-            var configurations = GetConfigurations(BuildConfiguration);
-            configurations.ForEach(configuration =>
-            {
+            foreach (var configuration in GlobBuildConfigurations())
                 DotNetPack(settings => settings
                     .SetConfiguration(configuration)
-                    .SetVersion(PackageVersion)
+                    .SetVersion(Version)
                     .SetOutputDirectory(ArtifactsDirectory)
                     .SetVerbosity(DotNetVerbosity.Minimal));
-            });
         });
 }

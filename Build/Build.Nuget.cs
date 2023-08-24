@@ -3,15 +3,14 @@ using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Utilities.Collections;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
-partial class Build
+sealed partial class Build
 {
     const string NugetApiUrl = "https://api.nuget.org/v3/index.json";
     [Secret] [Parameter] string NugetApiKey;
 
     Target NuGetPush => _ => _
         .Requires(() => NugetApiKey)
-        .OnlyWhenStatic(() => GitRepository.IsOnMainOrMasterBranch())
-        .OnlyWhenStatic(() => IsLocalBuild)
+        .OnlyWhenStatic(() => IsLocalBuild && GitRepository.IsOnMainOrMasterBranch())
         .Executes(() =>
         {
             ArtifactsDirectory.GlobFiles("*.nupkg")

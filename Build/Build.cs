@@ -1,26 +1,15 @@
 using Nuke.Common.Git;
 using Nuke.Common.ProjectModel;
+using Nuke.Common.Tools.GitVersion;
 
-partial class Build : NukeBuild
+sealed partial class Build : NukeBuild
 {
-    readonly AbsolutePath ArtifactsDirectory = RootDirectory / ArtifactsFolder;
+    string[] Configurations;
+
+    [Parameter] string GitHubToken;
     [GitRepository] readonly GitRepository GitRepository;
-    [Solution] readonly Solution Solution;
+    [GitVersion(NoFetch = true)] readonly GitVersion GitVersion;
+    [Solution(GenerateProjects = true)] readonly Solution Solution;
 
-    public static int Main() => Execute<Build>(x => x.Cleaning);
-
-    List<string> GetConfigurations(params string[] startPatterns)
-    {
-        var configurations = Solution.Configurations
-            .Select(pair => pair.Key)
-            .Where(s => startPatterns.Any(s.StartsWith))
-            .Select(s =>
-            {
-                var platformIndex = s.LastIndexOf('|');
-                return s.Remove(platformIndex);
-            })
-            .ToList();
-        if (configurations.Count == 0) throw new Exception($"Can't find configurations in the solution by patterns: {string.Join(" | ", startPatterns)}.");
-        return configurations;
-    }
+    public static int Main() => Execute<Build>(x => x.Clean);
 }
